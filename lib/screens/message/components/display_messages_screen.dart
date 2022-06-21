@@ -1,10 +1,10 @@
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-// class DisplayChatScreen extends StatelessWidget {
-//   const DisplayChatScreen({Key? key}) : super(key: key);
+class DisplayChatScreen extends StatelessWidget {
+   const DisplayChatScreen({Key? key}) : super(key: key);
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return ;
-//   }
-// }
+   @override
+   Widget build(BuildContext context) {
+     return Container();
+   }
+ }
