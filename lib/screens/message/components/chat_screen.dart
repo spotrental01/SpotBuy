@@ -1,10 +1,17 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:spotbuy/screens/message/components/message_bubble.dart';
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:uuid/uuid.dart';
+import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:mime/mime.dart';
 
 import '../../../constants.dart';
 
@@ -35,10 +42,10 @@ class ChatScreen extends StatelessWidget {
             onPressed: () {
               _makePhoneCall('tel:1234567890');
             },
-            icon: const Icon(Icons.call),
+            icon: const Icon(Icons.call,color: Colors.black,),
           ),
         ],
-        backgroundColor: const Color(0xff2E3C5D),
+        backgroundColor: Colors.white,
         toolbarHeight: 70,
         titleSpacing: 0,
         title: Row(
@@ -54,14 +61,14 @@ class ChatScreen extends StatelessWidget {
                 name,
                 style: const TextStyle(
                   fontSize: 22,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
             ),
           ],
         ), // You can add title here
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -147,7 +154,14 @@ class TypeMessage extends StatefulWidget {
 }
 
 class _TypeMessageState extends State<TypeMessage> {
+  final _user = const types.User(id: '06c33e8b-e835-4736-80f4-63f44b66666c');
   final TextEditingController _controller = TextEditingController();
+  final List<types.Message> _messages = [];
+  void _addMessage(types.Message message) {
+    setState(() {
+      _messages.insert(0, message);
+    });
+  }
 
   void _sendMessage(String _message, User user) async {
     FocusScope.of(context).unfocus();
@@ -179,10 +193,48 @@ class _TypeMessageState extends State<TypeMessage> {
     _controller.clear();
   }
 
+  PlatformFile ?pickedFile;
+  UploadTask? uploadTask;
+  Future _selectFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.any);
+    if(result ==null)return;
+    setState(() {
+      pickedFile =result.files.first;
+    });
+    final path ='${pickedFile!.name}';
+    final file =File(pickedFile!.path!);
+
+    final ref = FirebaseStorage.instance.ref().child(path);
+    uploadTask =ref.putFile(file);
+
+    final snapshot =await uploadTask!.whenComplete((){});
+
+    final urlDownload =await snapshot.ref.getDownloadURL();
+    print('Download Link: $urlDownload');
+
+  }
+  Widget attachFile() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Color(0xfff4f7fc),
+          borderRadius: BorderRadius.circular(10)
+      ),
+      height: 50,
+      width: 45,
+      child: IconButton(
+        icon: const Icon(Icons.attach_file, color: Colors.black),
+        onPressed: () {
+          _selectFile();
+
+        },
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.cyan,
+      color: Colors.white,
       child: SizedBox(
         height: MediaQuery.of(context).size.height * 0.1,
         child: Center(
@@ -190,40 +242,53 @@ class _TypeMessageState extends State<TypeMessage> {
             padding: const EdgeInsets.all(10),
             child: Row(
               children: [
+                attachFile(),
+                SizedBox(width: 10,),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        border: Border.all(width: 1, color: Colors.black)),
-                    child: TextField(
-                      controller: _controller,
-                      decoration: const InputDecoration(
-                        fillColor: Colors.white,
-                        filled: true,
-                        hintText: 'Type....',
-                        hintStyle: TextStyle(fontSize: 18, color: Colors.black),
-                        border: InputBorder.none,
-                        errorBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none,
-                        focusedErrorBorder: InputBorder.none,
-                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.0),
+                      border: Border.all(width: 1, color: Colors.black)
                     ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    FocusScope.of(context).unfocus();
-                    _controller.text.trim().isEmpty
-                        ? null
-                        : _sendMessage(_controller.text.trim(), cUser());
-                    // var message = _controller.text.trim().isEmpty?null ;
-                  },
-                  // icon: const Icon(
-                  //   Icons.send_rounded,
-                  icon: Image.asset(
-                    'assets/images/Send_icon.png',
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: TextField(
+                              controller: _controller,
+                              decoration: const InputDecoration(
+                                fillColor: Colors.white,
+                                filled: true,
+                                hintText: 'Type....',
+                                hintStyle: TextStyle(fontSize: 18, color: Colors.grey),
+                                border: InputBorder.none,
+                                errorBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                disabledBorder: InputBorder.none,
+                                focusedErrorBorder: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            FocusScope.of(context).unfocus();
+                            _controller.text.trim().isEmpty
+                                ? null
+                                : _sendMessage(_controller.text.trim(), cUser());
+                            // var message = _controller.text.trim().isEmpty?null ;
+                          },
+                          // icon: const Icon(
+                          //   Icons.send_rounded,
+                          icon: Image.asset(
+                            'assets/images/Send_icon.png',color: Colors.blue,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ],

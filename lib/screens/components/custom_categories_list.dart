@@ -19,12 +19,14 @@ class CustomCategoriesList extends StatelessWidget {
         height: getProportionateScreenHeight(100),
         child: StreamBuilder<QuerySnapshot>(
           stream:
-              FirebaseFirestore.instance.collection('categories').orderBy("id").snapshots(),
+              FirebaseFirestore.instance.collection('categories').orderBy("id").snapshots() ,
           builder: (context, snapshot) {
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
             }
             var categoryData = snapshot.data!.docs;
+            for(var index1=0;index1<categoryData.length;index1++)
+            print('Categories ${categoryData[index1]['title']}');
             // print(data[0]['title']);
             return ListView.builder(
               scrollDirection: Axis.horizontal,
