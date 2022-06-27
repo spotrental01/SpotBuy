@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:spotbuy/screens/message/components/chat_screen.dart';
 
@@ -20,6 +21,9 @@ class MainVehicleList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    final double itemHeight = size.height*0.666;
+    final double itemWidth = size.width / 2;
     return Expanded(
       child: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
@@ -38,111 +42,147 @@ class MainVehicleList extends StatelessWidget {
 
             final vehicleList = Provider.of<VehicleProvider>(context)
                 .getVehicleById(selectedCategory.id);
-            return GridView.builder(
+            return GridView.count(
+              crossAxisCount: 2,
+
+              childAspectRatio: (itemWidth / itemHeight),
               padding: EdgeInsets.zero,
-              itemCount: vehicleList.length,
-              itemBuilder: (context, index) => Card(
-                elevation: 5,
-                child: Padding(
+              /*itemCount: vehicleList.length,
+              itemBuilder: (context, index) =>*/children:[
+                for(var index =0;index<vehicleList.length;index++)
+                Card(
+                 elevation: 5,
+                 child: Padding(
                   padding: EdgeInsets.all(getProportionateScreenWidth(10)),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      SizedBox(
-                        height: 250,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: vehicleList[index].image.length,
-                          itemBuilder: (context, inde) => Container(
-                            margin: const EdgeInsets.only(right: 10),
-                            width: MediaQuery.of(context).size.width,
-                            child: Image.network(
-                              vehicleList[index].image[inde],
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        vehicleList[index].title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: getProportionateScreenWidth(30),
-                        ),
-                      ),
-                      SizedBox(
-                        height: getProportionateScreenHeight(5),
-                      ),
-                      Text(
-                        vehicleList[index].yearModel,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: getProportionateScreenWidth(15),
-                        ),
-                      ),
-                      Row(
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        /*crossAxisAlignment: CrossAxisAlignment.start,*/
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Chip(
-                            backgroundColor: const Color(0xFFF5AAAA),
-                            label: Text(
-                              vehicleList[index].ownerNo + ' owner',
+                          SizedBox(
+                            height: 150,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: vehicleList[index].image.length,
+                              itemBuilder: (context, inde) => Container(
+                                margin: const EdgeInsets.only(right: 10),
+                                width: MediaQuery.of(context).size.width,
+                                child: Image.network(
+                                  vehicleList[index].image[inde],
+                                  fit: BoxFit.fitWidth,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.topCenter,
+                            child: Text(
+                              vehicleList[index].title,
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: getProportionateScreenWidth(15),
+                                fontWeight: FontWeight.bold,
+                                fontSize: getProportionateScreenWidth(30),
                               ),
                             ),
                           ),
                           SizedBox(
-                            width: getProportionateScreenWidth(5),
+                            height: getProportionateScreenHeight(5),
                           ),
-                          Chip(
-                            backgroundColor: const Color(0xFFBAF4AA),
-                            label: Text(
-                              vehicleList[index].kmDriven + ' KM',
-                              style: TextStyle(
-                                fontSize: getProportionateScreenWidth(15),
+
+                          /*Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Chip(
+                                backgroundColor: const Color(0xFFF5AAAA),
+                                label: Text(
+                                  vehicleList[index].ownerNo + ' owner',
+                                  style: TextStyle(
+                                    fontSize: getProportionateScreenWidth(15),
+                                  ),
+                                ),
                               ),
+                              SizedBox(
+                                width: getProportionateScreenWidth(5),
+                              ),
+                              Chip(
+                                backgroundColor: const Color(0xFFBAF4AA),
+                                label: Text(
+                                  vehicleList[index].kmDriven + ' KM',
+                                  style: TextStyle(
+                                    fontSize: getProportionateScreenWidth(15),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: getProportionateScreenWidth(5),
+                              ),
+                              Chip(
+                                backgroundColor: const Color(0xFFAAD2F5),
+                                label: Text(
+                                  vehicleList[index].fuelType,
+                                  style: TextStyle(
+                                    fontSize: getProportionateScreenWidth(15),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),*/
+                          /*Text(
+                            'Description',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: getProportionateScreenWidth(20),
                             ),
                           ),
+                          Text(
+                            vehicleList[index].descriptionText,
+                            style: TextStyle(
+                              // fontWeight: FontWeight.bold,
+                              fontSize: getProportionateScreenWidth(15),
+                            ),
+                          ),*/
                           SizedBox(
-                            width: getProportionateScreenWidth(5),
+                            height: getProportionateScreenWidth(10),
                           ),
                           Chip(
-                            backgroundColor: const Color(0xFFAAD2F5),
+                            backgroundColor: Colors.cyanAccent,
                             label: Text(
-                              vehicleList[index].fuelType,
+                              '\u{20B9}${vehicleList[index].sellAmount}',
                               style: TextStyle(
-                                fontSize: getProportionateScreenWidth(15),
+                                fontWeight: FontWeight.bold,
+                                fontSize: getProportionateScreenWidth(23),
                               ),
                             ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Chip(
+                                backgroundColor: Colors.yellow,
+                                label: Text(
+                                  vehicleList[index].yearModel.characters.take(4).toString(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: getProportionateScreenWidth(15),
+                                  ),
+                                ),
+                              ),
+                              Chip(
+                                backgroundColor: const Color(0xFFAAD2F5),
+                                label: Text(
+                                  vehicleList[index].fuelType,
+                                  style: TextStyle(
+                                    fontSize: getProportionateScreenWidth(15),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
-                      ),
-                      Text(
-                        'Description',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: getProportionateScreenWidth(20),
-                        ),
-                      ),
-                      Text(
-                        vehicleList[index].descriptionText,
-                        style: TextStyle(
-                          // fontWeight: FontWeight.bold,
-                          fontSize: getProportionateScreenWidth(15),
-                        ),
-                      ),
-                      SizedBox(
-                        height: getProportionateScreenWidth(10),
-                      ),
-                      Text(
-                        '${vehicleList[index].sellAmount} \u{20B9}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: getProportionateScreenWidth(30),
-                        ),
                       ),
                       SizedBox(
                         width: double.infinity,
@@ -151,16 +191,16 @@ class MainVehicleList extends StatelessWidget {
                           onPressed: () {
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => ChatScreen(
-                                      toId: vehicleList[index].itemBy,
-                                      name: vehicleList[index].itemByName,
-                                    )));
+                                  toId: vehicleList[index].itemBy,
+                                  name: vehicleList[index].itemByName,
+                                )));
                           },
                           icon: const Icon(Icons.message),
                           label: Text(
                             'Start chatting'.toUpperCase(),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: getProportionateScreenWidth(20),
+                              fontSize: getProportionateScreenWidth(15),
                             ),
                           ),
                         ),
@@ -168,9 +208,11 @@ class MainVehicleList extends StatelessWidget {
                     ],
                   ),
                 ),
-              ), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
+              )],
             );
           }),
     );
   }
 }
+
+

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -52,12 +54,23 @@ class _editprofileState extends State<editprofile> {
     userController.dispose();
   }
 
-  Future getImage() async {
+  /*Future getImage() async {
     // final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     setState(() async {
       image = (await picker.pickImage(source: ImageSource.gallery)) as Image;
     });
+  }*/
+  File? image1;
+  Future getPhoto() async{
+    final image1 =await ImagePicker().pickImage(source: ImageSource.gallery);
+    if(image1 == null) return;
+
+    final imageTemporary =File(image1.path);
+    setState(() {
+      this.image1 = imageTemporary;
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,51 +104,41 @@ class _editprofileState extends State<editprofile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children:[
-                  InkWell(
-                    onTap: getImage,
-                    child: CircleAvatar(
-                      backgroundColor: const Color(0xff2E3C5D),
-                      radius: 40.0,
-                      child: CircleAvatar(
-                        radius: 38.0,
-                        child: Container(
-                          padding: const EdgeInsets.all(10.0),
-                          child: ClipOval(
-                            child: image,
-                          ),
-                        ),
-                        backgroundColor: Colors.white,
+              InkWell(
+                onTap: getPhoto,
+                child: CircleAvatar(
+                  backgroundColor: const Color(0xff2E3C5D),
+                  radius: 40.0,
+                  child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                    radius: 38,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        image: DecorationImage(
+                          fit: BoxFit.fitHeight,
+                          image:image1 == null
+                            ? Image.asset("assets/images/upload.jpg").image
+                            : Image.file(image1!).image,
+                        )
                       ),
-                    ),
+                        /*image1 == null
+                        ? Image.asset("assets/images/upload.jpg")
+                        : Image.file(image1!),*/
+                    )
                   ),
-                  // Container(
-                  //   margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                  //   child: Text(
-                  //     user!,
-                  //     style: const TextStyle(
-                  //       color: Colors.black38,
-                  //       fontSize: 20,
-                  //       fontWeight: FontWeight.bold,
-                  //     ),
-                  //   ),
-                  // )
-                ],
+                ),
               ),
               const SizedBox(
                 height: 20.0,
               ),
-
               const Text(
                 'Name',
                 style: TextStyle(
                   fontSize: 20.0,
                   color: Colors.black54,
                 ),
-              ),
-              const SizedBox(
-                height: 3,
               ),
               TextFormField(
                 controller: userController,
@@ -150,7 +153,6 @@ class _editprofileState extends State<editprofile> {
                   ),
                 ),
               ),
-
               const Text(
                 'Phone Number',
                 style: TextStyle(
@@ -172,7 +174,6 @@ class _editprofileState extends State<editprofile> {
                   enabledBorder: OutlineInputBorder(),
                 ),
               ),
-
               const Text(
                 'Email Address',
                 style: TextStyle(
@@ -197,7 +198,6 @@ class _editprofileState extends State<editprofile> {
                   enabledBorder: OutlineInputBorder(),
                 ),
               ),
-
               const Text(
                 'Gender',
                 style: TextStyle(
@@ -212,7 +212,7 @@ class _editprofileState extends State<editprofile> {
                 onChanged: (String newValue){
                   data['gender']=newValue;
                 },
-                key: Key(data['gender'].toString()),
+                //key: Key(data['gender'].toString()),
                 initialValue: data['gender'].toString(),
                 decoration: const InputDecoration(
                   suffixIcon: Icon(
@@ -221,7 +221,6 @@ class _editprofileState extends State<editprofile> {
                   enabledBorder: OutlineInputBorder(),
                 ),
               ),
-
               const Text(
                 'Address',
                 style: TextStyle(
@@ -237,7 +236,7 @@ class _editprofileState extends State<editprofile> {
                   data['address']=newValue;
                 },
                 initialValue: data['address'].toString(),
-                key: Key(data['address'].toString()),
+                /*key: Key(data['address'].toString()),*/
                 decoration: const InputDecoration(
                   suffixIcon: Icon(
                     Icons.home,
@@ -248,7 +247,6 @@ class _editprofileState extends State<editprofile> {
               const SizedBox(
                 height: 10.0,
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
